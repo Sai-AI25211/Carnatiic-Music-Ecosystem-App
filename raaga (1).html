@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Raaga — Carnatic Music Ecosystem</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0f0b08;
+    --surface: #1a1410;
+    --surface2: #241c15;
+    --border: #3a2d1f;
+    --gold: #c9933a;
+    --gold-light: #e8b96a;
+    --crimson: #8b2635;
+    --cream: #f5edd8;
+    --muted: #7a6a55;
+    --text: #e8dcc8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 10;
+  }
+
+  .logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+  }
+  .logo p {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .api-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .api-section label {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .api-section input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-family: monospace;
+    outline: none;
+  }
+  .api-section input:focus { border-color: var(--gold); }
+
+  nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+
+  .nav-group-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 20px 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 0;
+    transition: background 0.15s, color 0.15s;
+    font-size: 0.85rem;
+    color: var(--muted);
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: var(--surface2);
+    color: var(--gold);
+    border-left-color: var(--gold);
+  }
+  .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  /* ── Main ── */
+  #main {
+    margin-left: 240px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    padding: 20px 36px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .topbar h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--cream);
+  }
+  .topbar .badge {
+    background: var(--crimson);
+    color: #fff;
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .content { flex: 1; padding: 32px 36px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    color: var(--gold);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .card p { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+  /* ── AI Chat Box ── */
+  .ai-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 16px;
+  }
+  .ai-messages {
+    min-height: 180px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .msg {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    max-width: 88%;
+  }
+  .msg.user { background: var(--border); align-self: flex-end; color: var(--cream); }
+  .msg.ai { background: var(--surface); border: 1px solid var(--border); align-self: flex-start; color: var(--text); }
+  .msg.ai .ai-label {
+    font-size: 0.65rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .ai-input-row {
+    display: flex;
+    border-top: 1px solid var(--border);
+  }
+  .ai-input-row input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    padding: 14px 18px;
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+  }
+  .ai-input-row input::placeholder { color: var(--muted); }
+  .ai-input-row button {
+    background: var(--gold);
+    color: #1a1006;
+    border: none;
+    padding: 0 22px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .ai-input-row button:hover { background: var(--gold-light); }
+  .ai-input-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── Buttons ── */
+  .btn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 9px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--gold); color: #1a1006; }
+  .btn.primary { background: var(--gold); color: #1a1006; }
+  .btn.primary:hover { background: var(--gold-light); }
+  .btn.danger { border-color: var(--crimson); color: var(--crimson); }
+  .btn.danger:hover { background: var(--crimson); color: #fff; }
+
+  /* ── Forms ── */
+  .form-row { margin-bottom: 14px; }
+  .form-row label {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .form-row input, .form-row select, .form-row textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+    border-color: var(--gold);
+  }
+  .form-row textarea { resize: vertical; min-height: 80px; }
+  .form-row select option { background: var(--surface); }
+
+  /* ── Practice log ── */
+  .log-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-raga { color: var(--cream); font-weight: 500; }
+  .log-meta { color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+  .log-duration {
+    color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+  }
+
+  /* ── Student cards ── */
+  .student-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .student-card:last-child { border-bottom: none; }
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--crimson);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .student-info { flex: 1; }
+  .student-name { color: var(--cream); font-size: 0.88rem; }
+  .student-meta { color: var(--muted); font-size: 0.75rem; margin-top: 2px; }
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--crimson), var(--gold));
+    border-radius: 2px;
+  }
+
+  /* ── Archive items ── */
+  .archive-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .archive-item:hover { border-color: var(--gold); }
+  .play-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem;
+    color: #1a1006;
+    flex-shrink: 0;
+  }
+  .archive-info h4 { font-size: 0.88rem; color: var(--cream); }
+  .archive-info p { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── Stat boxes ── */
+  .stat-box { text-align: center; }
+  .stat-box .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.6rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-box .stat-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .tab {
+    padding: 10px 22px;
+    cursor: pointer;
+    font-size: 0.83rem;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* ── Tag ── */
+  .tag {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.7rem;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin: 2px;
+  }
+  .tag.gold { border-color: var(--gold); color: var(--gold); }
+
+  /* ── Hidden pages ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Typing indicator ── */
+  .typing { color: var(--muted); font-size: 0.8rem; padding: 8px 18px; font-style: italic; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .ornament {
+    color: var(--gold);
+    opacity: 0.3;
+    font-size: 1.2rem;
+    margin: 0 8px;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item input[type=checkbox] { accent-color: var(--gold); width: 15px; height: 15px; cursor: pointer; }
+  .checklist-item.done { color: var(--muted); text-decoration: line-through; }
+
+  .visa-doc {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .visa-doc:last-child { border-bottom: none; }
+  .status-badge {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  .status-badge.ready { background: #1a3320; color: #5db87a; }
+  .status-badge.pending { background: #2d2000; color: var(--gold); }
+  .status-badge.missing { background: #2d0a10; color: #e05c6a; }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<div id="sidebar">
+  <div class="logo">
+    <h1>Raaga</h1>
+    <p>Carnatic Ecosystem</p>
+  </div>
+
+  <div class="api-section">
+    <label>Gemini API Key <span id="key-saved" style="color:#5db87a;font-size:0.6rem;letter-spacing:0.08em;display:none">✓ saved</span></label>
+    <input type="password" id="apiKey" placeholder="AIza..."/>
+  </div>
+
+  <nav>
+    <div class="nav-group-label">Practice</div>
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <span class="icon">🏠</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('shruti')">
+      <span class="icon">🎵</span> AI Shruti / Tala
+    </div>
+    <div class="nav-item" onclick="showPage('analytics')">
+      <span class="icon">📊</span> Practice Analytics
+    </div>
+    <div class="nav-item" onclick="showPage('accompaniment')">
+      <span class="icon">🎻</span> AI Accompaniment
+    </div>
+
+    <div class="nav-group-label">Performance</div>
+    <div class="nav-item" onclick="showPage('arangetram')">
+      <span class="icon">🎭</span> Arangetram Prep
+    </div>
+    <div class="nav-item" onclick="showPage('archives')">
+      <span class="icon">🗃️</span> Concert Archives
+    </div>
+
+    <div class="nav-group-label">Management</div>
+    <div class="nav-item" onclick="showPage('guru')">
+      <span class="icon">👨‍🏫</span> Guru–Student Portal
+    </div>
+    <div class="nav-item" onclick="showPage('visa')">
+      <span class="icon">✈️</span> Visa & Tour
+    </div>
+  </nav>
+</div>
+
+<!-- ── MAIN ── -->
+<div id="main">
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="topbar">
+      <h2>Welcome back, Saicharan 🙏</h2>
+      <span class="badge">Student Pro</span>
+    </div>
+    <div class="content">
+      <div class="grid3" style="margin-bottom:20px">
+        <div class="card stat-box">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Practice Days This Month</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Ragas in Repertoire</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-num">0%</div>
+          <div class="stat-label">Avg. Shruti Accuracy</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Recent Practice</h3>
+          <p style="color:var(--muted);font-size:0.83rem;padding:16px 0">No sessions logged yet. Head to Practice Analytics to log your first session.</p>
+          <div style="margin-top:4px">
+            <button class="btn" onclick="showPage('analytics')">Log First Session →</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Ask Raaga AI</h3>
+          <p style="margin-bottom:14px">Get answers about ragas, talas, compositions, history, or practice tips.</p>
+          <div class="ai-box">
+            <div class="ai-messages" id="dash-messages">
+              <div class="msg ai"><div class="ai-label">Raaga AI</div>Namaskaram! Ask me anything about Carnatic music — ragas, talas, compositions, or practice advice.</div>
+            </div>
+            <div class="ai-input-row">
+              <input id="dash-input" placeholder="e.g. Explain the arohana of Kalyani raga…" onkeydown="if(event.key==='Enter') sendAI('dash')"/>
+              <button onclick="sendAI('dash')">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Upcoming</h3>
+        <p style="color:var(--muted);font-size:0.83rem;padding:12px 0">No upcoming classes or events scheduled yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHRUTI / TALA AI -->
+  <div id="page-shruti" class="page">
+    <div class="topbar"><h2>AI Shruti & Tala Coach</h2><span class="badge">AI Powered</span></div>
+    <div class="content">
+      <div class="grid2">
+        <div class="card">
+          <h3>Shruti (Pitch) Checker</h3>
+          <p style="margin-bottom:16px">Tell Raaga AI what you just sang. It will analyze your pitch accuracy for the raga.</p>
+          <div class="form-row">
+            <label>Select Raga</label>
+            <select id="shruti-raga">
+              <option>Shankarabharanam</option><option>Kalyani</option><option>Bhairavi</option>
+              <option>Todi</option><option>Kambhoji</option><option>Charukesi</option>
+              <option>Mohanam</option><option>Hamsadhwani</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Describe your practice / paste swaras</label>
+            <textarea id="shruti-desc" placeholder="e.g. I sang Sa Ri2 Ga3 Ma1 Pa Dha2 Ni3 Sa. I felt my Ga was slightly flat..."></textarea>
+          </div>
+          <button class="btn primary" onclick="shrutiAnalyze()">Analyze with AI →</button>
+          <div id="shruti-result" style="margin-top:16px"></div>
+        </div>
+
+        <div class="card">
+          <h3>Tala Practice Coach</h3>
+          <p style="margin-bottom:16px">Describe your tala practice and get corrections, tips, and exercises.</p>
+          <div class="form-row">
+            <label>Select Tala</label>
+            <select id="tala-select">
+              <option>Adi Tala (8 beats)</option><option>Rupaka Tala (6 beats)</option>
+              <option>Khanda Chapu (5 beats)</option><option>Misra Chapu (7 beats)</option>
+              <option>Dhruva Tala</option><option>Matya Tala</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Describe your difficulty</label>
+            <textarea id="tala-desc" placeholder="e.g. I keep losing count at the 6th beat of Adi tala when the tempo increases..."></textarea>
+          </div>
+          <button class="btn primary" onclick="talaCoach()">Get Coaching →</button>
+          <div id="tala-result" style="margin-top:16px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Live Q&A — Shruti & Tala</h3>
+        <div class="ai-box">
+          <div class="ai-messages" id="shruti-messages">
+            <div class="msg ai"><div class="ai-label">Raaga AI</div>I can help with pitch correction, swara identification, tala counting tips, and more. What would you like to work on?</div>
+          </div>
+          <div class="ai-input-row">
+            <input id="shruti-input" placeholder="Ask about any swara, raga lakshana, or tala…" onkeydown="if(event.key==='Enter') sendAI('shruti')"/>
+            <button onclick="sendAI('shruti')">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div id="page-analytics" class="page">
+    <div class="topbar"><h2>Practice Analytics</h2></div>
+    <div class="content">
+      <div class="grid3" style="margin-bottom:20px">
+        <div class="card stat-box">
+          <div class="stat-num">0h</div><div class="stat-label">Total This Year</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-num">0</div><div class="stat-label">Day Streak</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-num">0</div><div class="stat-label">Kritis Mastered</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Log Today's Practice</h3>
+          <div class="form-row">
+            <label>Raga Practiced</label>
+            <select id="log-raga">
+              <option>Shankarabharanam</option><option>Kalyani</option><option>Bhairavi</option>
+              <option>Todi</option><option>Kambhoji</option><option>Mohanam</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Type</label>
+            <select id="log-type">
+              <option>Varnam</option><option>Kriti</option><option>Alapana</option>
+              <option>Swara Kalpana</option><option>Pallavi</option><option>Scales / Exercises</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Duration (minutes)</label>
+            <input type="number" id="log-duration" placeholder="45" min="1"/>
+          </div>
+          <div class="form-row">
+            <label>Notes (optional)</label>
+            <textarea id="log-notes" placeholder="What went well? What needs work?"></textarea>
+          </div>
+          <button class="btn primary" onclick="logPractice()">Log Session</button>
+        </div>
+
+        <div class="card">
+          <h3>Practice Log</h3>
+          <div id="practice-log-list">
+            <p style="color:var(--muted);font-size:0.83rem;padding:16px 0">No sessions logged yet. Use the form to log your first practice!</p>
+          </div>
+
+          <div style="margin-top:16px">
+            <h3>Get AI Practice Report</h3>
+            <p style="font-size:0.82rem; color:var(--muted); margin-bottom:12px">Paste your weekly practice summary and get personalized recommendations.</p>
+            <textarea id="report-input" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.83rem;resize:vertical;min-height:70px;outline:none" placeholder="This week I practiced Kalyani varnam for 3 days, Bhairavi alapana twice…"></textarea>
+            <button class="btn primary" style="margin-top:10px" onclick="getReport()">Get AI Report →</button>
+            <div id="report-result" style="margin-top:12px;font-size:0.83rem;color:var(--text);line-height:1.7"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCOMPANIMENT -->
+  <div id="page-accompaniment" class="page">
+    <div class="topbar"><h2>AI Accompaniment Mode</h2><span class="badge">AI Powered</span></div>
+    <div class="content">
+      <div class="grid2">
+        <div class="card">
+          <h3>Setup Your Session</h3>
+          <div class="form-row">
+            <label>Raga</label>
+            <select id="acc-raga">
+              <option>Shankarabharanam</option><option>Kalyani</option><option>Bhairavi</option>
+              <option>Mohanam</option><option>Hamsadhwani</option><option>Kambhoji</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Tala</label>
+            <select id="acc-tala">
+              <option>Adi Tala</option><option>Rupaka Tala</option><option>Khanda Chapu</option><option>Misra Chapu</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Tempo</label>
+            <select id="acc-tempo">
+              <option>Slow (Vilamba Kalam)</option><option>Medium (Madhya Kalam)</option><option>Fast (Durita Kalam)</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Shruti (Base Pitch)</label>
+            <select id="acc-shruti">
+              <option>C (Sa)</option><option>C# (Sa)</option><option>D (Sa)</option>
+              <option>D# (Sa)</option><option>E (Sa)</option>
+            </select>
+          </div>
+          <button class="btn primary" onclick="getAccompaniment()">Generate Accompaniment Guide →</button>
+        </div>
+
+        <div class="card">
+          <h3>AI Session Guide</h3>
+          <div id="acc-result">
+            <p>Configure your session on the left and click Generate to receive a structured practice guide with mridangam patterns, suggested phrases, and accompaniment notes.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Tanpura & Drone Reference</h3>
+        <div class="ai-box">
+          <div class="ai-messages" id="acc-messages">
+            <div class="msg ai"><div class="ai-label">Raaga AI</div>Tell me your raga and I'll describe the ideal tanpura tuning, the characteristic phrases (gamaka patterns), and how an accompanist would typically respond during your performance.</div>
+          </div>
+          <div class="ai-input-row">
+            <input id="acc-input" placeholder="e.g. How would a mridangam accompany Bhairavi?" onkeydown="if(event.key==='Enter') sendAI('acc')"/>
+            <button onclick="sendAI('acc')">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARANGETRAM -->
+  <div id="page-arangetram" class="page">
+    <div class="topbar"><h2>Arangetram Preparation</h2></div>
+    <div class="content">
+      <div class="grid2">
+        <div class="card">
+          <h3>Checklist</h3>
+          <label class="checklist-item"><input type="checkbox" checked/> <span>Varnam fully mastered</span></label>
+          <label class="checklist-item"><input type="checkbox" checked/> <span>5 core kritis memorized</span></label>
+          <label class="checklist-item"><input type="checkbox"/><span>Alapana in 3 ragas</span></label>
+          <label class="checklist-item"><input type="checkbox"/><span>Swara kalpana practiced</span></label>
+          <label class="checklist-item"><input type="checkbox"/><span>Padam / Javali selected</span></label>
+          <label class="checklist-item"><input type="checkbox" checked/><span>Venue booked</span></label>
+          <label class="checklist-item"><input type="checkbox"/><span>Accompanying artists confirmed</span></label>
+          <label class="checklist-item"><input type="checkbox"/><span>Costume finalized</span></label>
+          <label class="checklist-item"><input type="checkbox"/><span>Invitations sent</span></label>
+          <label class="checklist-item"><input type="checkbox"/><span>Mock recital completed</span></label>
+          <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border)">
+            <div style="font-size:0.78rem;color:var(--muted); margin-bottom:6px">Completion</div>
+            <div class="progress-bar" style="height:6px"><div class="progress-fill" style="width:40%"></div></div>
+            <div style="font-size:0.78rem;color:var(--gold);margin-top:4px">4 / 10 complete</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Repertoire Tracker</h3>
+          <div class="log-entry">
+            <div><div class="log-raga">Viriboni Varnam</div><div class="log-meta">Bhairavi • Opening piece</div></div>
+            <span class="tag gold">Mastered</span>
+          </div>
+          <div class="log-entry">
+            <div><div class="log-raga">Entharo Mahanubhavulu</div><div class="log-meta">Sri • Thyagaraja</div></div>
+            <span class="tag gold">Mastered</span>
+          </div>
+          <div class="log-entry">
+            <div><div class="log-raga">Vatapi Ganapatim</div><div class="log-meta">Hamsadhwani • Dikshitar</div></div>
+            <span class="tag">In Progress</span>
+          </div>
+          <div class="log-entry">
+            <div><div class="log-raga">Kalyani Alapana</div><div class="log-meta">Manodharma item</div></div>
+            <span class="tag">In Progress</span>
+          </div>
+          <div style="margin-top:14px">
+            <button class="btn" onclick="showPage('guru')">Request Guru Review →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Ask AI — Arangetram Advice</h3>
+        <div class="ai-box">
+          <div class="ai-messages" id="arangetram-messages">
+            <div class="msg ai"><div class="ai-label">Raaga AI</div>I can help you plan your arangetram repertoire, sequence, timing, and preparation strategy. What would you like guidance on?</div>
+          </div>
+          <div class="ai-input-row">
+            <input id="arangetram-input" placeholder="e.g. What should the order of items be in my arangetram?" onkeydown="if(event.key==='Enter') sendAI('arangetram')"/>
+            <button onclick="sendAI('arangetram')">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARCHIVES -->
+  <div id="page-archives" class="page">
+    <div class="topbar"><h2>Concert Archives</h2></div>
+    <div class="content">
+      <div class="grid2">
+        <div class="card">
+          <h3>Add New Archive Entry</h3>
+          <div class="form-row"><label>Concert Title</label><input placeholder="e.g. Kalakshetra Annual Day 2024"/></div>
+          <div class="form-row"><label>Date</label><input type="date"/></div>
+          <div class="form-row"><label>Venue</label><input placeholder="e.g. Music Academy, Chennai"/></div>
+          <div class="form-row">
+            <label>Ragas Performed</label>
+            <input placeholder="e.g. Todi, Kalyani, Bhairavi, Shankarabharanam"/>
+          </div>
+          <div class="form-row">
+            <label>Visibility</label>
+            <select><option>Private</option><option>Shared with Guru</option><option>Public</option></select>
+          </div>
+          <button class="btn primary">Save Entry</button>
+        </div>
+
+        <div class="card">
+          <h3>My Archives</h3>
+          <div class="archive-item">
+            <div class="play-icon">▶</div>
+            <div class="archive-info">
+              <h4>Bharatiya Vidya Bhavan — Summer Concert</h4>
+              <p>Jun 2024 • Houston TX • Todi, Kambhoji, Bhairavi</p>
+            </div>
+          </div>
+          <div class="archive-item">
+            <div class="play-icon">▶</div>
+            <div class="archive-info">
+              <h4>Cleveland Thyagaraja Festival</h4>
+              <p>Apr 2024 • Cleveland OH • Shankarabharanam, Kalyani</p>
+            </div>
+          </div>
+          <div class="archive-item">
+            <div class="play-icon">▶</div>
+            <div class="archive-info">
+              <h4>Temple Margazhi Concert</h4>
+              <p>Dec 2023 • Fremont CA • Mohanam, Hamsadhwani</p>
+            </div>
+          </div>
+
+          <div style="margin-top:16px">
+            <h3>AI Archive Notes</h3>
+            <div class="ai-box" style="margin-top:10px">
+              <div class="ai-messages" id="archive-messages" style="min-height:100px">
+                <div class="msg ai"><div class="ai-label">Raaga AI</div>Describe a concert you gave and I'll help you write archive notes, analyse your repertoire choices, or suggest improvements for next time.</div>
+              </div>
+              <div class="ai-input-row">
+                <input id="archive-input" placeholder="Tell me about your last concert…" onkeydown="if(event.key==='Enter') sendAI('archive')"/>
+                <button onclick="sendAI('archive')">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GURU PORTAL -->
+  <div id="page-guru" class="page">
+    <div class="topbar"><h2>Guru–Student Portal</h2></div>
+    <div class="content">
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(this,'guru-students')">My Students</div>
+        <div class="tab" onclick="switchTab(this,'guru-assign')">Assign Lesson</div>
+        <div class="tab" onclick="switchTab(this,'guru-ai')">AI Lesson Planner</div>
+      </div>
+
+      <div id="guru-students">
+        <div class="card">
+          <h3>Active Students</h3>
+          <div class="student-card">
+            <div class="avatar">M</div>
+            <div class="student-info">
+              <div class="student-name">Meera Krishnan</div>
+              <div class="student-meta">Intermediate • Arangetram prep • Last class: 2 days ago</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:68%"></div></div>
+            </div>
+            <span class="tag gold">68%</span>
+          </div>
+          <div class="student-card">
+            <div class="avatar" style="background:#5a3a8a">A</div>
+            <div class="student-info">
+              <div class="student-name">Ananya Suresh</div>
+              <div class="student-meta">Beginner • Foundation kritis • Last class: 5 days ago</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:32%"></div></div>
+            </div>
+            <span class="tag gold">32%</span>
+          </div>
+          <div class="student-card">
+            <div class="avatar" style="background:#1a5a3a">R</div>
+            <div class="student-info">
+              <div class="student-name">Rohit Venkat</div>
+              <div class="student-meta">Advanced • Concert-ready • Last class: Today</div>
+              <div class="progress-bar"><div class="progress-fill" style="width:91%"></div></div>
+            </div>
+            <span class="tag gold">91%</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="guru-assign" style="display:none">
+        <div class="card">
+          <h3>Assign New Lesson</h3>
+          <div class="form-row"><label>Student</label>
+            <select><option>Meera Krishnan</option><option>Ananya Suresh</option><option>Rohit Venkat</option></select>
+          </div>
+          <div class="form-row"><label>Composition / Exercise</label>
+            <input placeholder="e.g. Vatapi Ganapatim — Hamsadhwani"/>
+          </div>
+          <div class="form-row"><label>Instructions</label>
+            <textarea placeholder="Practice at medium tempo, focus on the charanam phrases…"></textarea>
+          </div>
+          <div class="form-row"><label>Due Date</label><input type="date"/></div>
+          <button class="btn primary">Assign Lesson</button>
+        </div>
+      </div>
+
+      <div id="guru-ai" style="display:none">
+        <div class="card">
+          <h3>AI Lesson Planner</h3>
+          <p style="margin-bottom:14px">Describe a student's level and goals — get a structured lesson plan.</p>
+          <div class="ai-box">
+            <div class="ai-messages" id="guru-messages">
+              <div class="msg ai"><div class="ai-label">Raaga AI</div>Tell me about your student — their current level, what they've mastered, and your goals for the next 3–6 months. I'll generate a structured lesson plan.</div>
+            </div>
+            <div class="ai-input-row">
+              <input id="guru-input" placeholder="e.g. Student is intermediate, knows 10 kritis, arangetram in 8 months…" onkeydown="if(event.key==='Enter') sendAI('guru')"/>
+              <button onclick="sendAI('guru')">Generate Plan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VISA & TOUR -->
+  <div id="page-visa" class="page">
+    <div class="topbar"><h2>Visa & Tour Management</h2></div>
+    <div class="content">
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(this,'visa-docs')">Visa Documents</div>
+        <div class="tab" onclick="switchTab(this,'visa-tour')">Tour Itinerary</div>
+        <div class="tab" onclick="switchTab(this,'visa-ai')">AI Visa Advisor</div>
+      </div>
+
+      <div id="visa-docs">
+        <div class="card">
+          <h3>O-1B / P-1 Visa Document Checklist</h3>
+          <div class="visa-doc"><span>Passport (valid 6+ months)</span><span class="status-badge ready">Ready</span></div>
+          <div class="visa-doc"><span>DS-160 Application Form</span><span class="status-badge ready">Ready</span></div>
+          <div class="visa-doc"><span>Invitation Letter from US Organization</span><span class="status-badge pending">Pending</span></div>
+          <div class="visa-doc"><span>Performance Itinerary / Schedule</span><span class="status-badge pending">Pending</span></div>
+          <div class="visa-doc"><span>Evidence of Recognition (press clippings, awards)</span><span class="status-badge missing">Missing</span></div>
+          <div class="visa-doc"><span>Peer Group / Expert Opinion Letters</span><span class="status-badge missing">Missing</span></div>
+          <div class="visa-doc"><span>Proof of High Remuneration</span><span class="status-badge pending">Pending</span></div>
+          <div class="visa-doc"><span>Petitioner Support Letter</span><span class="status-badge ready">Ready</span></div>
+        </div>
+      </div>
+
+      <div id="visa-tour" style="display:none">
+        <div class="card">
+          <h3>Add Tour Stop</h3>
+          <div class="grid2">
+            <div class="form-row"><label>City</label><input placeholder="e.g. New York, NY"/></div>
+            <div class="form-row"><label>Date</label><input type="date"/></div>
+            <div class="form-row"><label>Venue</label><input placeholder="e.g. Bharatiya Vidya Bhavan"/></div>
+            <div class="form-row"><label>Organizer Contact</label><input placeholder="email or phone"/></div>
+          </div>
+          <button class="btn primary">Add Stop</button>
+        </div>
+        <div class="card">
+          <h3>Current Tour — US East Coast 2025</h3>
+          <div class="log-entry">
+            <div><div class="log-raga">New York, NY</div><div class="log-meta">Oct 12 • India Cultural Center</div></div>
+            <span class="tag gold">Confirmed</span>
+          </div>
+          <div class="log-entry">
+            <div><div class="log-raga">Washington DC</div><div class="log-meta">Oct 14 • Mason Temple Hall</div></div>
+            <span class="tag gold">Confirmed</span>
+          </div>
+          <div class="log-entry">
+            <div><div class="log-raga">Boston, MA</div><div class="log-meta">Oct 16 • MIT India Club</div></div>
+            <span class="tag">Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="visa-ai" style="display:none">
+        <div class="card">
+          <h3>AI Visa Advisor</h3>
+          <p style="margin-bottom:14px;font-size:0.83rem;color:var(--muted)">⚠️ For general guidance only. Always consult an immigration attorney for legal advice.</p>
+          <div class="ai-box">
+            <div class="ai-messages" id="visa-messages">
+              <div class="msg ai"><div class="ai-label">Raaga AI</div>I can help you understand visa options for touring Carnatic musicians (O-1B, P-1B, B-1), what documents you need, and how to write invitation letters. What's your situation?</div>
+            </div>
+            <div class="ai-input-row">
+              <input id="visa-input" placeholder="e.g. I'm a professional Carnatic vocalist touring the US for 3 months…" onkeydown="if(event.key==='Enter') sendAI('visa')"/>
+              <button onclick="sendAI('visa')">Ask AI</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── API Key persistence ──
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('raaga_gemini_key');
+  if (saved) {
+    document.getElementById('apiKey').value = saved;
+    document.getElementById('key-saved').style.display = 'inline';
+  }
+});
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('apiKey').addEventListener('input', function() {
+    localStorage.setItem('raaga_gemini_key', this.value);
+    document.getElementById('key-saved').style.display = this.value ? 'inline' : 'none';
+  });
+});
+
+// ── Navigation ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── Tab switching ──
+function switchTab(el, targetId) {
+  const tabs = el.parentElement.querySelectorAll('.tab');
+  tabs.forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // hide all sibling divs that are tab panels
+  const panels = document.querySelectorAll('#' + targetId).length
+    ? el.closest('.content').querySelectorAll('[id^="' + targetId.split('-')[0] + '-"]')
+    : [];
+  panels.forEach(p => p.style.display = 'none');
+  const target = document.getElementById(targetId);
+  if (target) target.style.display = 'block';
+}
+
+// ── Gemini API ──
+async function callGemini(prompt, systemContext) {
+  const key = document.getElementById('apiKey').value.trim();
+  if (!key) return '⚠️ Please enter your Gemini API key in the sidebar first.';
+
+  const fullPrompt = systemContext
+    ? `You are Raaga AI, an expert assistant for Carnatic classical music. ${systemContext}\n\nUser: ${prompt}`
+    : `You are Raaga AI, an expert assistant for Carnatic classical music with deep knowledge of ragas, talas, compositions, history, performance practice, and teaching methodology.\n\nUser: ${prompt}`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: fullPrompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+        })
+      }
+    );
+    const data = await res.json();
+    if (data.error) return `Error: ${data.error.message}`;
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received.';
+  } catch (e) {
+    return `Network error: ${e.message}`;
+  }
+}
+
+// ── Generic chat sender ──
+async function sendAI(chatId) {
+  const inputEl = document.getElementById(chatId + '-input');
+  const messagesEl = document.getElementById(chatId + '-messages');
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  // Add user message
+  messagesEl.innerHTML += `<div class="msg user">${text}</div>`;
+  inputEl.value = '';
+
+  // Typing indicator
+  const typingId = 'typing-' + Date.now();
+  messagesEl.innerHTML += `<div class="typing" id="${typingId}">Raaga AI is thinking…</div>`;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  const systemContexts = {
+    shruti: 'Focus on shruti (pitch), swara accuracy, raga lakshanas, and tala. Give practical, specific corrections.',
+    acc: 'Focus on accompaniment — mridangam patterns, tanpura tuning, violin accompaniment style, and practice sessions.',
+    arangetram: 'Focus on arangetram preparation — repertoire, sequencing, stage etiquette, and preparation timelines.',
+    archive: 'Help the musician document and reflect on their concert performances.',
+    guru: 'Act as a master guru helping plan structured Carnatic music lessons for students.',
+    visa: 'Provide general information about visa options for Indian classical musicians (O-1B, P-1B, B-1). Always recommend consulting an immigration attorney.',
+    dash: 'Answer general questions about Carnatic music, ragas, talas, composers, and practice.'
+  };
+
+  const reply = await callGemini(text, systemContexts[chatId] || '');
+  document.getElementById(typingId).remove();
+  messagesEl.innerHTML += `<div class="msg ai"><div class="ai-label">Raaga AI</div>${reply.replace(/\n/g,'<br/>')}</div>`;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// ── Shruti Analyzer ──
+async function shrutiAnalyze() {
+  const raga = document.getElementById('shruti-raga').value;
+  const desc = document.getElementById('shruti-desc').value.trim();
+  if (!desc) { alert('Please describe your practice first.'); return; }
+  const resultEl = document.getElementById('shruti-result');
+  resultEl.innerHTML = '<div class="typing">Analyzing…</div>';
+  const prompt = `Analyze the following Carnatic practice for the raga ${raga}. Identify any pitch issues, give corrections, and provide the correct arohana/avarohana and key phrases for the raga.\n\nPractice description: ${desc}`;
+  const reply = await callGemini(prompt, 'You are an expert Carnatic vocalist and teacher specializing in shruti (pitch) correction.');
+  resultEl.innerHTML = `<div class="card" style="margin-top:0;background:var(--bg)">${reply.replace(/\n/g,'<br/>')}</div>`;
+}
+
+// ── Tala Coach ──
+async function talaCoach() {
+  const tala = document.getElementById('tala-select').value;
+  const desc = document.getElementById('tala-desc').value.trim();
+  if (!desc) { alert('Please describe your difficulty first.'); return; }
+  const resultEl = document.getElementById('tala-result');
+  resultEl.innerHTML = '<div class="typing">Generating coaching…</div>';
+  const prompt = `A Carnatic music student is struggling with the following tala: ${tala}.\n\nTheir difficulty: ${desc}\n\nProvide specific exercises, counting methods, and tips to improve.`;
+  const reply = await callGemini(prompt, 'You are an expert Carnatic mridangam teacher and tala coach.');
+  resultEl.innerHTML = `<div class="card" style="margin-top:0;background:var(--bg)">${reply.replace(/\n/g,'<br/>')}</div>`;
+}
+
+// ── Practice Log ──
+function logPractice() {
+  const raga = document.getElementById('log-raga').value;
+  const type = document.getElementById('log-type').value;
+  const duration = document.getElementById('log-duration').value;
+  if (!duration) { alert('Please enter duration.'); return; }
+  const logList = document.getElementById('practice-log-list');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `<div><div class="log-raga">${raga}</div><div class="log-meta">${type} • Today</div></div><div class="log-duration">${duration} min</div>`;
+  logList.insertBefore(entry, logList.firstChild);
+  document.getElementById('log-duration').value = '';
+  document.getElementById('log-notes').value = '';
+}
+
+// ── AI Practice Report ──
+async function getReport() {
+  const input = document.getElementById('report-input').value.trim();
+  if (!input) { alert('Please describe your week first.'); return; }
+  const resultEl = document.getElementById('report-result');
+  resultEl.innerHTML = '<div class="typing">Generating report…</div>';
+  const prompt = `Based on this Carnatic music practice summary, give a structured weekly report with: strengths, areas for improvement, specific exercises, and next week's focus areas.\n\nPractice summary: ${input}`;
+  const reply = await callGemini(prompt, 'You are a Carnatic music teacher providing practice feedback.');
+  resultEl.innerHTML = reply.replace(/\n/g,'<br/>');
+}
+
+// ── Accompaniment Guide ──
+async function getAccompaniment() {
+  const raga = document.getElementById('acc-raga').value;
+  const tala = document.getElementById('acc-tala').value;
+  const tempo = document.getElementById('acc-tempo').value;
+  const shruti = document.getElementById('acc-shruti').value;
+  const resultEl = document.getElementById('acc-result');
+  resultEl.innerHTML = '<div class="typing">Generating accompaniment guide…</div>';
+  const prompt = `Create a practice session guide for a Carnatic musician practicing:\n- Raga: ${raga}\n- Tala: ${tala}\n- Tempo: ${tempo}\n- Shruti: ${shruti}\n\nInclude: suggested opening phrases, key characteristic phrases to explore, mridangam pattern description for this tala, tanpura tuning notes, and practice tips.`;
+  const reply = await callGemini(prompt, 'You are a Carnatic music guru providing accompaniment and session guidance.');
+  resultEl.innerHTML = reply.replace(/\n/g,'<br/>');
+}
+</script>
+</body>
+</html>
